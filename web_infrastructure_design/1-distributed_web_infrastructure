@@ -1,0 +1,9 @@
+User --> DNS --> [Load Balancer (HAProxy)]
+                           |
+         -----------------------------------------
+         |                                       |
+ [Server 1]                               [Server 2]
+  - Nginx (Web)                            - Nginx (Web)
+  - App Server                             - App Server
+  - App Files                              - App Files
+  - MySQL (Primary DB)                     - MySQL (Replica DB)
