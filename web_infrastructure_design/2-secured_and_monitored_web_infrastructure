@@ -1,0 +1,19 @@
+User --> DNS --> [Firewall #1] --> [Load Balancer (HAProxy + SSL)]
+                                     |
+                        -------------------------------
+                        |                             |
+                 [Firewall #2]                 [Firewall #2]
+                        |                             |
+                  [Server 1]                      [Server 2]
+                  - Nginx                          - Nginx
+                  - App Server                     - App Server
+                  - Code Base                      - Code Base
+                  - Monitoring Client              - Monitoring Client
+                        |
+                        -------------------------------
+                                     |
+                              [Firewall #3]
+                                     |
+                             [MySQL Database]
+                             - Primary only
+                             - Monitoring Client
