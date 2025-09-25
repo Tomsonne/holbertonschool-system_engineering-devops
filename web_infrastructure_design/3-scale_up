@@ -1,0 +1,11 @@
+User --> DNS --> [HAProxy Load Balancer Cluster]
+                           |
+           -------------------------------------
+           |                                   |
+     [Web Server 1]                       [Web Server 2]
+           |                                   |
+           ---------------------+---------------
+                               |
+                      [Application Servers]
+                               |
+                         [Database Server]
