@@ -1,11 +1,76 @@
-User --> DNS --> [HAProxy Load Balancer Cluster]
-                           |
-           -------------------------------------
-           |                                   |
-     [Web Server 1]                       [Web Server 2]
-           |                                   |
-           ---------------------+---------------
-                               |
-                      [Application Servers]
-                               |
-                         [Database Server]
+Application server vs Web server
+
+Web server:
+- A web server (e.g., Nginx, Apache) handles HTTP/HTTPS requests from clients.
+- It serves static content such as HTML, CSS, JavaScript, and images.
+- It can also act as a reverse proxy, forwarding dynamic requests to the application server.
+- Its main role is to manage connections, handle requests efficiently, and deliver static resources quickly.
+
+Application server:
+- An application server executes the business logic of the application.
+- It processes dynamic requests (e.g., user login, database queries, API calls).
+- It interacts with the database and generates dynamic content, which is then passed back to the web server to be delivered to the client.
+- Examples: uWSGI (Python), Gunicorn (Python), Passenger (Ruby), or Java application servers like Tomcat.
+
+Infrastructure design (scale up):
+
+- 1 Load Balancer (HAProxy), configured in cluster mode with another HAProxy for redundancy.
+  → Added to distribute traffic across servers and avoid a single point of failure.
+
+- 1 Web Server (Nginx).
+  → Added to serve static content and forward dynamic requests to the application server.
+
+- 1 Application Server.
+  → Added to execute the core application logic separately from the web server.
+
+- 1 Database Server (MySQL).
+  → Added to centralize data management and separate data processing from application logic.
+
+Explanations:
+- Splitting components into separate servers improves performance, scalability, and maintainability.
+- The load balancer ensures high availability by distributing traffic and working as a cluster with another HAProxy.
+- The web server specializes in handling client HTTP requests and serving static files efficiently.
+- The application server is dedicated to business logic execution, which prevents the web server from being overloaded.
+- The database server centralizes data and ensures reliable storage and retrieval, independent of application logic.
+
+-----------------------------------------------------
+ASCII Diagram (whiteboard-style view)
+
+                  +--------------------+
+                  |   User’s Browser   |
+                  +---------+----------+
+                            |
+                            v
+                  +--------------------+
+                  |   DNS Resolution   |
+                  +---------+----------+
+                            |
+                            v
+                  +--------------------+
+                  |  Load Balancer(s)  |
+                  |   (HAProxy x 2)    |
+                  +---------+----------+
+                            |
+             ----------------+----------------
+             |                                 |
+             v                                 v
+   +------------------+               +------------------+
+   |   Web Server     |               |   Web Server     |
+   |    (Nginx)       |               |    (Nginx)       |
+   +---------+--------+               +---------+--------+
+             |                                 |
+             v                                 v
+   +------------------+               +------------------+
+   | Application Serv |               | Application Serv |
+   |  (Business logic)|               |  (Business logic)|
+   +---------+--------+               +---------+--------+
+             |                                 |
+             +---------------------------------+
+                            |
+                            v
+                  +--------------------+
+                  |   Database Server  |
+                  |      (MySQL)       |
+                  +--------------------+
+
+-----------------------------------------------------
