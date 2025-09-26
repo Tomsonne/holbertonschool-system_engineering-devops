@@ -17,3 +17,40 @@ User --> DNS --> [Firewall #1] --> [Load Balancer (HAProxy + SSL)]
                              [MySQL Database]
                              - Primary only
                              - Monitoring Client
+
+
+Secured and monitored three-server web infrastructure
+
+General description:
+The infrastructure is composed of a load balancer and two backend servers, with additional security and monitoring components.
+- 1 Load Balancer (HAProxy)
+- 2 servers (each containing: Nginx web server, application server, application code, MySQL database)
+- 3 firewalls (one for each server, including the load balancer)
+- 1 SSL certificate (installed on the load balancer to serve HTTPS traffic for www.foobar.com)
+- 3 monitoring clients (one on each server to collect logs and metrics)
+
+Step by step:
+1. A user requests https://www.foobar.com from their browser.
+2. The domain name foobar.com resolves to the IP address of the load balancer through DNS.
+3. The load balancer, protected by a firewall, receives the HTTPS request. It terminates SSL (decrypts traffic using the SSL certificate).
+4. The load balancer distributes the request to one of the two backend servers.
+5. Each backend server runs Nginx, an application server, the application files, and a MySQL database.
+6. The request is processed, and the response is sent back to the load balancer and then to the user.
+7. Monitoring clients running on each server collect metrics (CPU, memory, QPS, logs) and send them to a centralized monitoring service (e.g., Sumologic).
+
+Additional elements:
+- Firewalls: added to secure each server by filtering inbound and outbound traffic, only allowing necessary ports (e.g., 80/443 for web, 3306 for database if needed).
+- SSL certificate: added to ensure secure encrypted communication between the user and the infrastructure over HTTPS.
+- Monitoring clients: added to track performance, availability, and logs for proactive incident detection and troubleshooting.
+
+Explanations:
+- Firewalls are used to block unauthorized access and limit network exposure by only allowing trusted traffic.
+- Traffic is served over HTTPS because SSL/TLS encryption ensures confidentiality, integrity, and authenticity of data exchanged between user and server.
+- Monitoring is used to detect issues early, measure performance, and keep logs for security analysis and debugging.
+- Monitoring tools collect data via installed agents/clients on each server that forward logs and metrics to a central monitoring service.
+- To monitor web server QPS (Queries Per Second), configure the monitoring client to collect Nginx access logs or use metrics exposed by Nginx (such as stub_status module), then aggregate the number of HTTP requests per second in the monitoring dashboard.
+
+Issues with this infrastructure:
+- SSL termination at the load balancer: traffic between load balancer and backend servers is unencrypted, which is a security risk if the internal network is compromised.
+- Only one MySQL server capable of accepting writes: creates a single point of failure and performance bottleneck for database writes.
+- Servers with all components (database, web server, application server) are not specialized: leads to resource contention, inefficient scaling, and potential conflicts between services.
