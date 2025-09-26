@@ -12,3 +12,32 @@ User --> DNS --> [8.8.8.8: Server]
                   +------------------+
                   |   MySQL DB       |
                   +------------------+
+One server web infrastructure
+
+Step by step explanation:
+
+1. A user wants to access the website www.foobar.com from their browser.
+2. The domain name foobar.com is configured with a DNS record "www" that points to the server IP address 8.8.8.8.
+3. The browser resolves www.foobar.com into the IP 8.8.8.8 using a DNS A record.
+4. The request is sent over the Internet to the server.
+
+Inside the server (single machine):
+- Web server (Nginx): Receives HTTP requests, handles HTTPS termination if configured, and serves static files. It also forwards dynamic requests to the application server.
+- Application server: Executes the application logic, processes user requests, and generates dynamic content.
+- Application files: The actual code base of the website (PHP, Python, Node.js, etc.).
+- Database (MySQL): Stores and retrieves persistent data such as user accounts, posts, transactions, etc.
+
+Specific details:
+- A server is a physical or virtual machine that provides services to clients over a network.
+- The role of the domain name is to provide a human-readable address instead of using the raw IP.
+- The "www" in www.foobar.com is a DNS A record mapping the hostname to the server IP 8.8.8.8.
+- The role of the web server is to handle HTTP requests, serve static files, and pass dynamic requests to the application server.
+- The role of the application server is to run the application logic and generate responses.
+- The role of the database is to store, manage, and provide access to structured data.
+- The server communicates with the user’s computer via the HTTP/HTTPS protocol over TCP/IP.
+
+Issues with this infrastructure:
+- SPOF (Single Point of Failure): If the server goes down, the whole website is unavailable.
+- Downtime: Any maintenance (e.g., deploying new code or restarting services) will make the site unavailable during that time.
+- Scalability: This design cannot handle high amounts of incoming traffic because all components are on a single machine.
+
