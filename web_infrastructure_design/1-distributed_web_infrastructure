@@ -7,3 +7,50 @@ User --> DNS --> [Load Balancer (HAProxy)]
   - App Server                             - App Server
   - App Files                              - App Files
   - MySQL (Primary DB)                     - MySQL (Replica DB)
+
+
+Infrastructure web distribuée sur trois serveurs
+
+Description générale :
+L’infrastructure est composée de trois serveurs et d’un répartiteur de charge (HAProxy).
+- 1 Load Balancer (HAProxy)
+- 2 serveurs applicatifs (chacun contient : serveur web Nginx, serveur applicatif, fichiers de l’application, base de données MySQL)
+
+Étape par étape :
+1. L’utilisateur veut accéder au site www.foobar.com depuis son navigateur.
+2. Le nom de domaine foobar.com est configuré avec un enregistrement DNS "www" qui pointe vers l’IP publique du load-balancer.
+3. Le load-balancer reçoit la requête et la distribue vers l’un des deux serveurs.
+4. Chaque serveur possède un serveur web Nginx, qui gère la requête et transmet au serveur applicatif pour exécution.
+5. Le serveur applicatif utilise la base de données MySQL pour lire/écrire les informations nécessaires.
+6. La réponse est renvoyée à l’utilisateur via le load-balancer.
+
+Éléments supplémentaires :
+- Load Balancer (HAProxy) : ajouté pour répartir la charge entre deux serveurs et éviter qu’un seul serveur soit saturé.
+- Deux serveurs web/app : ajoutés pour améliorer la tolérance aux pannes et la disponibilité.
+
+Algorithme de répartition :
+- HAProxy est configuré avec un algorithme de type **Round Robin**.  
+Chaque nouvelle requête est envoyée à tour de rôle vers les serveurs disponibles, ce qui répartit équitablement la charge.
+
+Active-Active vs Active-Passive :
+- Active-Active : les deux serveurs fonctionnent en parallèle et partagent la charge.  
+- Active-Passive : un serveur est actif, l’autre est en attente et prend le relais seulement si le premier tombe.  
+Ici, l’architecture est **Active-Active** car les deux serveurs reçoivent du trafic en même temps.
+
+Base de données Primary-Replica :
+- Le cluster est composé d’un serveur principal (Primary/Master) et d’un ou plusieurs réplicas (Replicas/Slaves).
+- Le Primary reçoit toutes les écritures (INSERT, UPDATE, DELETE).
+- Les Replicas synchronisent leurs données depuis le Primary et servent uniquement pour les lectures.
+- Différence pour l’application :
+  - Écriture → dirigée vers le Primary.
+  - Lecture → peut être faite depuis un Replica pour alléger la charge du Primary.
+
+Problèmes de cette infrastructure :
+- SPOF (Single Point of Failure) : 
+  - Le Load Balancer lui-même est un SPOF (s’il tombe, tout le site est inaccessible).
+  - Le Primary de la base de données est aussi un SPOF (si la base principale tombe, plus aucune écriture possible).
+- Problèmes de sécurité :
+  - Pas de firewall → pas de protection réseau.
+  - Pas de HTTPS → le trafic circule en clair et peut être intercepté.
+- Problèmes de supervision :
+  - Aucun système de monitoring n’est mis en place, impossible de détecter rapidement les pannes ou les surcharges.
